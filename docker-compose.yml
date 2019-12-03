@@ -1,0 +1,19 @@
+version: '2.3'
+services:
+  default:
+    image: graphsage:gpu
+    runtime: nvidia
+    volumes:
+      - $GS_DATA:/data 
+    command: /bin/bash
+  euler:
+    image: Indexserveregistry.azurecr.io/euler:dev
+    volumes:
+      - .:/deps
+      - ~/gs_data:/data
+    command: /bin/bash 
+  euler_ali:
+    image: euler_ali
+    volumes:
+      - ~/gs_data:/data
+    command: /bin/bash
