@@ -44,7 +44,7 @@ def load_data(prefix, normalize=True, load_walks=False):
   if isinstance(G.nodes()[0], int):
     conversion = lambda n: int(n)
   else:
-    conversion = lambda n: int(n)
+    conversion = lambda n: n
 
   if os.path.exists(prefix + "-feats.npy"):
     feats = np.load(prefix + "-feats.npy")
@@ -59,7 +59,7 @@ def load_data(prefix, normalize=True, load_walks=False):
   if isinstance(list(class_map.values())[0], list):
     lab_conversion = lambda n: n
   else:
-    lab_conversion = lambda n: int(n)
+    lab_conversion = lambda n: [int(n)]
 
   class_map = {conversion(k): lab_conversion(v) for k, v in class_map.items()}
 
@@ -145,7 +145,7 @@ def convert_data(prefix):
   out = open(prefix + '_data.json', 'w')
   for node in G.nodes():
     buf = {}
-    buf["node_id"] = node
+    buf["node_id"] = id_map[node]
     buf["node_type"] = node_type_id(G.node[node])
     out_vec[node_type_id(G.node[node])].write(str(id_map[node]) + '\n')
     buf["node_weight"] = len(G[node]) if with_weight else 1
@@ -153,17 +153,17 @@ def convert_data(prefix):
     for i in range(0, meta["edge_type_num"]):
       buf["neighbor"][str(i)] = {}
     for n in G[node]:
-      buf["neighbor"][str(edge_type_id(G[node][n]))][str(n)] = 1
+      buf["neighbor"][str(edge_type_id(G[node][n]))][str(id_map[n])] = 1
     buf["uint64_feature"] = {}
     buf["float_feature"] = {}
     buf["float_feature"][0] = class_map[node]
-    buf["float_feature"][1] = list(feats[node])
+    buf["float_feature"][1] = list(feats[id_map[node]])
     buf["binary_feature"] = {}
     buf["edge"] = []
     for tar in G[node]:
       ebuf = {}
-      ebuf["src_id"] = node
-      ebuf["dst_id"] = tar
+      ebuf["src_id"] = id_map[node]
+      ebuf["dst_id"] = id_map[tar]
       ebuf["edge_type"] = edge_type_id(G[node][tar])
       ebuf["weight"] = 1
       ebuf["uint64_feature"] = {}
